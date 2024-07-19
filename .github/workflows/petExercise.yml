@@ -1,0 +1,57 @@
+name: PetClinic
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [ '22' ]
+        os: [ubuntu-latest]
+        arch: [amd64]
+        
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          repository: spring-projects/spring-petclinic    
+
+      - name: Set up JDK ${{matrix.java}}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{matrix.java}}
+          distribution: 'adopt'
+          cache: maven
+
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+#      - name: Build with Maven Wrapper
+#        run: ./mvnw -B package   
+
+      - name: Build a Docker Image
+        run: ./mvnw spring-boot:build-image
+        
+      - name: Change image name
+        run: docker tag docker.io/library/spring-petclinic:3.3.0-SNAPSHOT jeffabbott/testing:latest
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push Docker image to Docker Hub
+        run: docker push jeffabbott/testing:latest
