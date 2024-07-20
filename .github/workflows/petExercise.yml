@@ -39,6 +39,8 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
+            
+#      To build outside of docker image 
 #      - name: Build with Maven Wrapper
 #        run: ./mvnw -B package   
 
