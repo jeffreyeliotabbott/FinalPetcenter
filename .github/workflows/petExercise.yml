@@ -38,8 +38,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-#      - name: Build with Maven Wrapper
-#        run: ./mvnw -B package   
+      - name: Build with Maven Wrapper
+        run: ./mvn package dockerfile:build -e   
 
       - name: Build a Docker Image
         run: ./mvnw spring-boot:build-image
